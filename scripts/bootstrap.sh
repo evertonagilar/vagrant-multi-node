@@ -1,4 +1,20 @@
+ls
+
+
 #!/bin/bash
+#
+# Objetivos do script:
+# * Configurar comunicação ssh entre VMs
+# * Configurar locale pt_BR.UTF-8
+# * Configurar o timezone para America/Sao_Paulo
+# * Instalação de pacotes básicos 
+# * Criar /etc/apt/keyrings se não existe
+# * Configurar o vim
+# * Desabilitar o swap
+#
+#
+#######################################################################
+
 
 echo Configurar comunicação ssh entre VMs
 sed -i 's/^PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
@@ -30,7 +46,7 @@ dpkg-reconfigure --frontend noninteractive tzdata
 ### --------------------------------
 
 
-echo Instalação dos pacotes necessários para a utilização do Kubernetes
+echo Instalação de pacotes básicos 
 apt install -y vim apt-transport-https ca-certificates curl wget gnupg lsb-release nfs-common htop chrony
 
 
@@ -59,6 +75,16 @@ cp /root/.vimrc /home/vagrant/.vimrc && chown vagrant:vagrant /home/vagrant/.vim
 
 
 ### --------------------------------
+
+
+echo Desabilitar o swap
+swapoff -a
+sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+
+
+### --------------------------------
+
 
 
 reboot

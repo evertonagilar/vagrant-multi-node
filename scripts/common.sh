@@ -5,6 +5,12 @@
 
 K8S_VERSION=1.29.3-1.1
 
+echo
+echo A versão do Kubernetes será: $K8S_VERSION
+echo
+
+
+### --------------------------------
 
 
 echo Download da chave publica do Kubernetes
@@ -53,12 +59,6 @@ echo Marcar para não atualizar Kubernetes junto com o apt upgrade
 sudo apt-mark hold kubelet kubeadm kubectl
 
 
-### --------------------------------
-
-
-echo Mostrar os pacotes marcados para não atualizar
-sudo apt-mark showhold
-
 
 ### --------------------------------
 
@@ -74,6 +74,8 @@ iptable_nat
 iptable_mangle
 iptable_filter
 EOF
+modprobe overlay
+modprobe br_netfilter
 
 
 ### --------------------------------
@@ -112,10 +114,15 @@ sudo containerd config default | \
 ### --------------------------------
 
 
-echo Desabilitar o swap
-sudo swapoff -a
-sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+echo Confgurar auto complete Kubernetes
+sudo apt-get install -y bash-completion
+kubectl completion bash | sudo tee -a /etc/bash_completion.d/kubectl
+echo 'alias k=kubectl' | sudo tee -a /etc/bash.bashrc
+echo 'complete -F __start_kubectl k' | sudo tee -a /etc/bash.bashrc
 
 
 ### --------------------------------
 
+
+echo Mostrar os pacotes marcados para não atualizar
+sudo apt-mark showhold
