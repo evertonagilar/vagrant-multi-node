@@ -4,6 +4,9 @@ ls
 #!/bin/bash
 #
 # Objetivos do script:
+# ====================================================================
+# * Cadastrar variáveis /etc/environment
+# * Configurar /etc/hosts
 # * Configurar comunicação ssh entre VMs
 # * Configurar locale pt_BR.UTF-8
 # * Configurar o timezone para America/Sao_Paulo
@@ -16,11 +19,56 @@ ls
 #######################################################################
 
 
-echo Configurar comunicação ssh entre VMs
-sed -i 's/^PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+### --------------------------------
+
+echo Cadastrar variáveis /etc/environment
+if [ "$VM_TYPE" == 'controlplane' ]; then
+    echo VM_CONTROLPLANE_NUMBER=$VM_CONTROLPLANE_NUMBER >> /etc/environment
+    echo VM_CONTROLPLANE_COUNT=$VM_CONTROLPLANE_COUNT >> /etc/environment
+else
+    echo VM_WORKER_NUMBER=$VM_WORKER_NUMBER >> /etc/environment
+    echo VM_WORKER_COUNT=$VM_WORKER_COUNT >> /etc/environment
+fi
+echo VM_COUNT=$COUNT >> /etc/environment
+echo VM_TYPE="$VM_TYPE" >> /etc/environment
+echo VM_BOX=$VM_BOX >> /etc/environment
+echo VM_BOX_VERSION=$VM_BOX_VERSION >> /etc/environment
+echo VM_IP_SUFIX=$VM_IP_SUFIX >> /etc/environment
+echo VM_IP_START="$VM_IP_START" >> /etc/environment
+echo VM_NAME_SUFIX="$VM_NAME_SUFIX" >> /etc/environment
+echo VM_HOSTNAME="$VM_HOSTNAME" >> /etc/exit
+echo VM_IP="$VM_IP" >> /etc/environment
+echo VM_VIRTUAL_IP="$VM_VIRTUAL_IP" >> /etc/environment
+echo VM_DNS_PREFIX="$VM_DNS_PREFIX" >> /etc/environment
+echo VM_DNS_CONTROL_PLANE="$VM_DNS_CONTROL_PLANE" >> /etc/environment
+
+
+
+### --------------------------------
+
+
+echo Configurar /etc/hosts
+echo $VM_VIRTUAL_IP $VM_DNS_CONTROL_PLANE >> /etc/hosts
+for i in $(seq 1 $VM_COUNT); do
+    echo "${VM_IP_SUFIX}.$((VM_IP_START + i))" "${VM_NAME_SUFIX}${i}" >> /etc/hosts
+done
+
+
+
+echo Configurar comunicação ssh entre VMs com root (Para conveniência)
+sed -i \
+    's/^PasswordAuthentication .*/PasswordAuthentication yes/' \
+    /etc/ssh/sshd_config
+sed -i \
+  's/^#PermitRootLogin.*/PermitRootLogin yes/' \
+  /etc/ssh/sshd_config
 systemctl reload sshd
-echo 'Definindo senha do root para teste'
+
+
+### --------------------------------
+
+
+echo Configurar senha do root
 echo -e "teste\nteste" | passwd root >/dev/null 2>&1
 
 
@@ -82,9 +130,5 @@ swapoff -a
 sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
 
-
 ### --------------------------------
 
-
-
-reboot
