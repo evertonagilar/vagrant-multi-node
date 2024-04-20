@@ -1,4 +1,4 @@
- # Projeto para subir VMs para laboratórios
+ # Projeto para provisionar um cluster Kubernetes em alta disponibilidade
 
 ## Configuração default no Vagrantfile
 **SO:** Debian 12

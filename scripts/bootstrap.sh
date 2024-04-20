@@ -1,8 +1,6 @@
 #!/bin/bash
 
-### --------------------------------
-
-echo 'Exibir as variávies e cadastrar em /etc/environment'
+echo 'Exibir as variáveis e cadastrar em /etc/environment'
 vm_variables=$(env | grep -E '^VM_')
 vm_variable_names=(${vm_variables[@]})
 for vm_variable in "${vm_variables[@]}"; do
@@ -14,7 +12,7 @@ done
 
 ### --------------------------------
 
-echo 'Chamando os scripts'
+echo 'Chamando os scripts para provisionar o servidor...'
 source scripts/common.sh
 source scripts/k8s.sh
 source scripts/keepalived.sh

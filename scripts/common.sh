@@ -1,10 +1,7 @@
 #!/bin/bash
 #
-# Fazer a configuração básica da VM
-#
 # Objetivos do script:
 # ====================================================================
-# * Cadastrar variáveis /etc/environment
 # * Configurar /etc/hosts
 # * Configurar comunicação ssh entre VMs
 # * Configurar locale pt_BR.UTF-8
