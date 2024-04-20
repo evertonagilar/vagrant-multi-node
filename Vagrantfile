@@ -6,8 +6,8 @@ VM_WORKER_COUNT = 2
 VM_COUNT = VM_CONTROLPLANE_COUNT + VM_WORKER_COUNT
 VM_IP_SUFIX = "192.168.10"
 VM_IP_START = 10
-VM_MASTER_NODE_NAME = "vm-master"
-VM_WORKER_NODE_NAME = "vm-worker"
+VM_MASTER_BASE_NAME = "vm-master"
+VM_WORKER_BASE_NAME = "vm-worker"
 VM_VIRTUAL_IP = "#{VM_IP_SUFIX}.#{VM_IP_START}"
 VM_DNS_PREFIX = "kubernetes.local"
 VM_DNS_VIRTUAL_IP = "controlplane"
@@ -23,89 +23,42 @@ Vagrant.configure(2) do |config|
   
   # Cria as VMs control-plane
   (1..VM_CONTROLPLANE_COUNT).each do |i|
-    VM_HOSTNAME = "#{VM_MASTER_NODE_NAME}#{i}"
-    VM_IP = "#{VM_IP_SUFIX}.#{VM_IP_START + i}"
-    VM_CONTROLPLANE_NUMBER = i
-    VM_VRRP_PRIORIDADE = 100 + VM_CONTROLPLANE_NUMBER
-    VM_VRRP_TYPE_INSTANCE = "MASTER"
-    if VM_CONTROLPLANE_NUMBER > 1
-        VM_VRRP_TYPE_INSTANCE = "BACKUP"
-    end
-    config.vm.define "#{VM_HOSTNAME}" do |node|
-      node.vm.hostname = "#{VM_HOSTNAME}"
-      node.vm.network "private_network", ip: "#{VM_IP}"
+    hostname = "#{VM_MASTER_BASE_NAME}#{i}"
+    ip = "#{VM_IP_SUFIX}.#{VM_IP_START + i}"
+    controlplaneNumber = i
+    vrrpPrioridade = 100 - controlplaneNumber
+    vrrpType = controlplaneNumber == 1 ? "MASTER" : "BACKUP"
+    config.vm.define hostname do |node|
       node.vm.provider "virtualbox" do |v|
-        v.name = "#{VM_HOSTNAME}"
+        v.name = hostname
         v.memory = 2048
         v.cpus = 2
       end
-
+      node.vm.hostname = hostname
+      node.vm.network "private_network", ip: ip
+      node.vm.provision "file", source: "scripts", destination: "~/scripts"
+      node.vm.provision "file", source: "config", destination: "~/config"
       node.vm.provision "shell",
         env: {
-          "VM_BOX" => VM_BOX,
-          "VM_BOX_VERSION" => VM_BOX_VERSION,
-          "VM_CONTROLPLANE_COUNT" => VM_CONTROLPLANE_COUNT,
-          "VM_CONTROLPLANE_NUMBER" => i,
-          "VM_COUNT" => VM_COUNT,
-          "VM_TYPE" => "controlplane",
-          "VM_IP_START" => VM_IP_START,
-          "VM_IP_SUFIX" => VM_IP_SUFIX,
-          "VM_MASTER_NODE_NAME" => VM_MASTER_NODE_NAME,
-          "VM_WORKER_NODE_NAME" => VM_WORKER_NODE_NAME,
-          "VM_HOSTNAME" => VM_HOSTNAME,
-          "VM_DNS_PREFIX" => VM_DNS_PREFIX,
-          "VM_IP" => VM_IP,
-          "VM_VIRTUAL_IP" => VM_VIRTUAL_IP,
-          "VM_DNS_VIRTUAL_IP" => VM_DNS_VIRTUAL_IP,
-          "VM_VRRP_PRIORIDADE" => VM_VRRP_PRIORIDADE,
-          "VM_VRRP_TYPE_INSTANCE" => VM_VRRP_TYPE_INSTANCE,
-          "VM_K8S_VERSION" => VM_K8S_VERSION
-        }, path: "scripts/common.sh"
-      node.vm.provision "shell",
-          env: {
-            "VM_BOX" => VM_BOX,
-            "VM_BOX_VERSION" => VM_BOX_VERSION,
-            "VM_CONTROLPLANE_COUNT" => VM_CONTROLPLANE_COUNT,
-            "VM_CONTROLPLANE_NUMBER" => i,
-            "VM_COUNT" => VM_COUNT,
-            "VM_TYPE" => "controlplane",
-            "VM_IP_START" => VM_IP_START,
-            "VM_IP_SUFIX" => VM_IP_SUFIX,
-            "VM_MASTER_NODE_NAME" => VM_MASTER_NODE_NAME,
-            "VM_WORKER_NODE_NAME" => VM_WORKER_NODE_NAME,
-            "VM_HOSTNAME" => VM_HOSTNAME,
-            "VM_DNS_PREFIX" => VM_DNS_PREFIX,
-            "VM_IP" => VM_IP,
-            "VM_VIRTUAL_IP" => VM_VIRTUAL_IP,
-            "VM_DNS_VIRTUAL_IP" => VM_DNS_VIRTUAL_IP,
-            "VM_VRRP_PRIORIDADE" => VM_VRRP_PRIORIDADE,
-            "VM_VRRP_TYPE_INSTANCE" => VM_VRRP_TYPE_INSTANCE,
-            "VM_K8S_VERSION" => VM_K8S_VERSION
-          },
-          path: "scripts/k8s.sh"
-      node.vm.provision "shell",
-        env: {
-          "VM_BOX" => VM_BOX,
-          "VM_BOX_VERSION" => VM_BOX_VERSION,
-          "VM_CONTROLPLANE_COUNT" => VM_CONTROLPLANE_COUNT,
-          "VM_CONTROLPLANE_NUMBER" => i,
-          "VM_COUNT" => VM_COUNT,
-          "VM_TYPE" => "controlplane",
-          "VM_IP_START" => VM_IP_START,
-          "VM_IP_SUFIX" => VM_IP_SUFIX,
-          "VM_MASTER_NODE_NAME" => VM_MASTER_NODE_NAME,
-          "VM_WORKER_NODE_NAME" => VM_WORKER_NODE_NAME,
-          "VM_HOSTNAME" => VM_HOSTNAME,
-          "VM_DNS_PREFIX" => VM_DNS_PREFIX,
-          "VM_IP" => VM_IP,
-          "VM_VIRTUAL_IP" => VM_VIRTUAL_IP,
-          "VM_DNS_VIRTUAL_IP" => VM_DNS_VIRTUAL_IP,
-          "VM_VRRP_PRIORIDADE" => VM_VRRP_PRIORIDADE,
-          "VM_VRRP_TYPE_INSTANCE" => VM_VRRP_TYPE_INSTANCE,
-          "VM_K8S_VERSION" => VM_K8S_VERSION
-        },
-        path: "scripts/keepalived.sh"
-
+              "VM_BOX" => VM_BOX,
+              "VM_BOX_VERSION" => VM_BOX_VERSION,
+              "VM_CONTROLPLANE_COUNT" => VM_CONTROLPLANE_COUNT,
+              "VM_CONTROLPLANE_NUMBER" => controlplaneNumber,
+              "VM_COUNT" => VM_COUNT,
+              "VM_TYPE" => "controlplane",
+              "VM_IP_START" => VM_IP_START,
+              "VM_IP_SUFIX" => VM_IP_SUFIX,
+              "VM_MASTER_BASE_NAME" => VM_MASTER_BASE_NAME,
+              "VM_WORKER_BASE_NAME" => VM_WORKER_BASE_NAME,
+              "VM_HOSTNAME" => hostname,
+              "VM_IP" => ip,
+              "VM_DNS_PREFIX" => VM_DNS_PREFIX,
+              "VM_VIRTUAL_IP" => VM_VIRTUAL_IP,
+              "VM_DNS_VIRTUAL_IP" => VM_DNS_VIRTUAL_IP,
+              "VM_VRRP_PRIORIDADE" => vrrpPrioridade,
+              "VM_VRRP_TYPE" => vrrpType,
+              "VM_K8S_VERSION" => VM_K8S_VERSION
+            }, path: "scripts/bootstrap.sh"
     end
   end
 end
