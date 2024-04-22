@@ -13,7 +13,11 @@ VM_DNS_PREFIX = "kubernetes.local"
 VM_DNS_VIRTUAL_IP = "controlplane"
 VM_BOX = "boxomatic/debian-12"
 VM_BOX_VERSION = "20240225.0.1"
-VM_K8S_VERSION="1.29.3-1.1"
+VM_K8S_VERSION = "1.29.4"
+VM_CONTROL_PLANE_ENDPOINT = "#{VM_DNS_VIRTUAL_IP}.#{VM_DNS_PREFIX}:6443"
+VM_POD_NETWORK_CIDR = "10.244.0.0/16"
+VM_SERVICE_CIDR = "10.96.0.0/12"
+VM_CALICO_VERSION = "v3.27.1"
 
 Vagrant.configure(2) do |config|
   config.vm.box = "#{VM_BOX}"
@@ -44,6 +48,9 @@ Vagrant.configure(2) do |config|
               "VM_BOX_VERSION" => VM_BOX_VERSION,
               "VM_CONTROLPLANE_COUNT" => VM_CONTROLPLANE_COUNT,
               "VM_CONTROLPLANE_NUMBER" => controlplaneNumber,
+              "VM_CONTROL_PLANE_ENDPOINT" => VM_CONTROL_PLANE_ENDPOINT,
+              "VM_POD_NETWORK_CIDR" => VM_POD_NETWORK_CIDR,
+              "VM_SERVICE_CIDR" => VM_SERVICE_CIDR,
               "VM_COUNT" => VM_COUNT,
               "VM_TYPE" => "controlplane",
               "VM_IP_START" => VM_IP_START,
@@ -57,7 +64,8 @@ Vagrant.configure(2) do |config|
               "VM_DNS_VIRTUAL_IP" => VM_DNS_VIRTUAL_IP,
               "VM_VRRP_PRIORIDADE" => vrrpPrioridade,
               "VM_VRRP_TYPE" => vrrpType,
-              "VM_K8S_VERSION" => VM_K8S_VERSION
+              "VM_K8S_VERSION" => VM_K8S_VERSION,
+              "VM_CALICO_VERSION" => VM_CALICO_VERSION
             }, path: "scripts/bootstrap.sh"
     end
   end

@@ -12,7 +12,18 @@ done
 
 ### --------------------------------
 
-echo 'Chamando os scripts para provisionar o servidor...'
+echo 'Chamando os scripts para provisionar o cluster Kubernetes...'
 source scripts/common.sh
-source scripts/k8s.sh
-source scripts/keepalived.sh
+source scripts/k8s-common.sh
+
+# Executar somente em controlplane
+if [ -n "$VM_CONTROLPLANE_NUMBER" ]; then
+    source scripts/keepalived.sh
+    if [ "$VM_CONTROLPLANE_NUMBER" == "1" ]; then
+        source scripts/k8s-init.sh
+    else
+        source scripts/k8s-join.sh
+    fi
+else  # Executar em worker node
+    source scripts/k8s-join.sh
+fi

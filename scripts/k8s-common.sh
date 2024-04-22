@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Instalar os componentes do cluster Kubernetes
+# Instalar o software do Kubernetes
 #
 #
 #######################################################################
@@ -17,49 +17,50 @@ echo
 
 
 echo 'Download da chave publica do Kubernetes'
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 
 echo 'Adicionar o repo Kubernetes'
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
 
 
 ### --------------------------------
 
 
 echo 'Download da chave publica do Docker'
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
 
 echo 'Adicionar o repo Docker'
-sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 
 ### --------------------------------
 
 
-sudo apt update
+echo 'Atualizar repositório apt'
+apt update
 
 
 ### --------------------------------
 
 
 echo 'Instalar Containerd'
-sudo apt install containerd.io
+apt install -y containerd.io
 
 echo 'Marcar para não atualizar containerd.io junto com o apt upgrade'
-sudo apt-mark hold containerd.io
+apt-mark hold containerd.io
 
 
 ### --------------------------------
 
 
 echo "Instalar ferramentas Kubernetes"
-sudo apt install -y kubelet=$VM_K8S_VERSION kubeadm=$VM_K8S_VERSION kubectl=$VM_K8S_VERSION
+apt install -y kubelet=$VM_K8S_VERSION kubeadm=$VM_K8S_VERSION kubectl=$VM_K8S_VERSION
 
 
 echo 'Marcar para não atualizar Kubernetes junto com o apt upgrade'
-sudo apt-mark hold kubelet kubeadm kubectl
+apt-mark hold kubelet kubeadm kubectl
 
 
 
@@ -67,7 +68,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 
 echo 'Configurar os módulos de kernel necessários para o K8S/Containerd'
-cat << EOF | sudo tee /etc/modules-load.d/k8s.conf
+cat << EOF | tee /etc/modules-load.d/k8s.conf
 overlay
 br_netfilter
 nf_nat
@@ -85,7 +86,7 @@ modprobe br_netfilter
 
 
 echo 'Configurar alguns parâmetros do sistema para Containerd'
-cat << EOF | sudo tee /etc/sysctl.d/100-k8s.conf
+cat << EOF | tee /etc/sysctl.d/100-k8s.conf
 kernel.shmall = 2097152
 kernel.shmmax = 4294967295
 kernel.shmmni = 4096
@@ -101,7 +102,7 @@ net.core.wmem_max = 1048576
 fs.aio-max-nr = 1048576
 fs.file-max = 6815744
 EOF
-sudo sysctl --system
+sysctl --system
 
 
 ### --------------------------------
@@ -109,23 +110,51 @@ sudo sysctl --system
 
 echo 'Criar o arquivo de configuração do Containerd'
 mkdir -p /etc/containerd
-sudo containerd config default | \
+ containerd config default | \
   sed 's/^\([[:space:]]*SystemdCgroup = \).*/\1true/' | \
-  sudo tee /etc/containerd/config.toml
-
+  tee /etc/containerd/config.toml
+systemctl restart containerd
 
 ### --------------------------------
 
 
 echo 'Confgurar auto complete Kubernetes'
-sudo apt-get install -y bash-completion
-kubectl completion bash | sudo tee -a /etc/bash_completion.d/kubectl
-echo 'alias k=kubectl' | sudo tee -a /etc/bash.bashrc
-echo 'complete -F __start_kubectl k' | sudo tee -a /etc/bash.bashrc
+apt-get install -y bash-completion
+mkdir -p /etc/bash_completion.d
+kubectl completion bash > /etc/bash_completion.d/kubectl
+echo << EOF | tee -a /etc/bash.bashrc
+source /usr/share/bash-completion/bash_completion
+source /etc/bash_completion
+source <(kubectl completion bash)
+alias k=kubectl
+complete -F __start_kubectl k
+EOF
 
 
 ### --------------------------------
 
 
 echo 'Mostrar os pacotes marcados para não atualizar'
-sudo apt-mark showhold
+ apt-mark showhold
+
+
+### --------------------------------
+
+
+echo 'Configurar o crictl'
+echo << EOF | tee /etc/crictl.yaml
+runtime-endpoint: unix:///run/containerd/containerd.sock
+image-endpoint: unix:///run/containerd/containerd.sock
+timeout: 2
+debug: false
+pull-image-on-create: false
+EOF
+
+
+### --------------------------------
+
+
+echo 'Habilitar o containerd e o kubelet'
+systemctl enable --now containerd
+systemctl enable --now kubelet
+
