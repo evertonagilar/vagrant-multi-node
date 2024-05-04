@@ -1,19 +1,20 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+VM_PASSWD_ROOT="teste"
 VM_CONTROLPLANE_COUNT = 2
 VM_WORKER_COUNT = 2
 VM_COUNT = VM_CONTROLPLANE_COUNT + VM_WORKER_COUNT
 VM_IP_SUFIX = "192.168.10"
 VM_IP_START = 10
-VM_MASTER_BASE_NAME = "vm-master"
+VM_MASTER_BASE_NAME = "vm-controlplane"
 VM_WORKER_BASE_NAME = "vm-worker"
 VM_VIRTUAL_IP = "#{VM_IP_SUFIX}.#{VM_IP_START}"
 VM_DNS_PREFIX = "kubernetes.local"
 VM_DNS_VIRTUAL_IP = "controlplane"
 VM_BOX = "boxomatic/debian-12"
 VM_BOX_VERSION = "20240225.0.1"
-VM_K8S_VERSION = "1.29.4"
+VM_K8S_VERSION = "1.29.4-2.1"
 VM_CONTROL_PLANE_ENDPOINT = "#{VM_DNS_VIRTUAL_IP}.#{VM_DNS_PREFIX}:6443"
 VM_POD_NETWORK_CIDR = "10.244.0.0/16"
 VM_SERVICE_CIDR = "10.96.0.0/12"
@@ -44,6 +45,7 @@ Vagrant.configure(2) do |config|
       node.vm.provision "file", source: "config", destination: "~/config"
       node.vm.provision "shell",
         env: {
+              "VM_PASSWD_ROOT" => VM_PASSWD_ROOT,
               "VM_BOX" => VM_BOX,
               "VM_BOX_VERSION" => VM_BOX_VERSION,
               "VM_CONTROLPLANE_COUNT" => VM_CONTROLPLANE_COUNT,

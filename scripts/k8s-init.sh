@@ -47,9 +47,3 @@ chown $(id -u):$(id -g) $HOME/.kube/config
 echo 'Instalar plugin de rede Calico CNI'
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/$VM_CALICO_VERSION/manifests/calico.yaml
 
-
-### --------------------------------
-
-echo 'Criar kubeadm join token'
-join_command="$(kubeadm token create --print-join-command)"
-echo "${join_command} --cri-socket /run/containerd/containerd.sock" > /opt/join_token

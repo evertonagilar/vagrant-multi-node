@@ -135,7 +135,7 @@ EOF
 
 
 echo 'Mostrar os pacotes marcados para não atualizar'
- apt-mark showhold
+apt-mark showhold
 
 
 ### --------------------------------

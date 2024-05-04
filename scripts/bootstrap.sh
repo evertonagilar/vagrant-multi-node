@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo 'Exibir as variáveis e cadastrar em /etc/environment'
+echo 'Cadastrar variáveis do Vagrantfile em /etc/environment'
 vm_variables=$(env | grep -E '^VM_')
 vm_variable_names=(${vm_variables[@]})
 for vm_variable in "${vm_variables[@]}"; do
@@ -16,14 +16,17 @@ echo 'Chamando os scripts para provisionar o cluster Kubernetes...'
 source scripts/common.sh
 source scripts/k8s-common.sh
 
-# Executar somente em controlplane
+# *** Executar em controlplane ***
 if [ -n "$VM_CONTROLPLANE_NUMBER" ]; then
     source scripts/keepalived.sh
     if [ "$VM_CONTROLPLANE_NUMBER" == "1" ]; then
         source scripts/k8s-init.sh
+        source scripts/k8s-join-print.sh
     else
-        source scripts/k8s-join.sh
+        source scripts/k8s-join-controlplane.sh
     fi
-else  # Executar em worker node
-    source scripts/k8s-join.sh
+
+# **** Executar em worker node ***
+else
+    source scripts/k8s-join-worker.sh
 fi
