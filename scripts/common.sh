@@ -15,12 +15,18 @@
 #######################################################################
 
 
-echo 'Configurar /etc/hosts'
-echo "$VM_VIRTUAL_IP $VM_DNS_VIRTUAL_IP.${VM_DNS_PREFIX}" >> /etc/hosts
+echo 'Cadastrar máquinas virtuais em /etc/hosts'
+echo "$VM_VIRTUAL_IP $VM_DNS_VIRTUAL_IP $VM_DNS_VIRTUAL_IP.${VM_DNS_PREFIX}" >> /etc/hosts
 for i in $(seq 1 $VM_CONTROLPLANE_COUNT); do
     node="${VM_MASTER_BASE_NAME}${i}"
     node_fqdn="${node}.${VM_DNS_PREFIX}"
-    ip="${VM_IP_SUFIX}.$((VM_IP_START + i))"
+    ip="${VM_IP_SUFIX}.$((VM_IP_CONTROLPLANE_START + i))"
+    echo "$ip ${node} ${node_fqdn}" >> /etc/hosts
+done
+for i in $(seq 1 $VM_WORKER_COUNT); do
+    node="${VM_WORKER_BASE_NAME}${i}"
+    node_fqdn="${node}.${VM_DNS_PREFIX}"
+    ip="${VM_IP_SUFIX}.$((VM_IP_WORKER_START + i))"
     echo "$ip ${node} ${node_fqdn}" >> /etc/hosts
 done
 
@@ -43,13 +49,25 @@ sed -i \
 
 ### --------------------------------
 
-echo 'Configurar parâmetro ssh StrictHostKeyChecking para no'
+echo 'Criar arquivo configuração /home/vagrant/.ssh/config'
 cat << EOF >> /home/vagrant/.ssh/config
-Host ${VM_IP_SUFIX}.*
+Host vm-*
    StrictHostKeyChecking no
    UserKnownHostsFile=/dev/null
 EOF
 chmod 600 /home/vagrant/.ssh/config
+
+
+### --------------------------------
+
+
+echo 'Criar arquivo configuração /root/.ssh/config'
+cat << EOF >> /root/.ssh/config
+Host vm-*
+   StrictHostKeyChecking no
+   UserKnownHostsFile=/dev/null
+EOF
+chmod 600 /root/.ssh/config
 
 
 ### --------------------------------
@@ -62,11 +80,20 @@ if [ ! -f "/vagrant/config/ssh/k8s-multinode" ]; then
     ssh-keygen -t rsa -C 'Chave k8s-multinode project' -N '' -f "/vagrant/config/ssh/k8s-multinode"
 fi
 
+### --------------------------------
+
 echo "Copiando chave privada e pública para /home/vagrant/.ssh/"
 cp "/vagrant/config/ssh/k8s-multinode" "/vagrant/config/ssh/k8s-multinode.pub" /home/vagrant/.ssh/
 cat "/vagrant/config/ssh/k8s-multinode.pub" >> /home/vagrant/.ssh/authorized_keys
 chmod 600 /home/vagrant/.ssh/k8s-multinode
 chmod 644 /home/vagrant/.ssh/k8s-multinode.pub
+chown -R vagrant:vagrant /home/vagrant/.ssh
+
+### --------------------------------
+
+echo "Copiando chave privada e pública para /home/vagrant/.ssh/"
+cp "/vagrant/config/ssh/k8s-multinode" "/vagrant/config/ssh/k8s-multinode.pub" /root/.ssh/
+cat "/vagrant/config/ssh/k8s-multinode.pub" >> /root/.ssh/authorized_keys
 
 
 ### --------------------------------

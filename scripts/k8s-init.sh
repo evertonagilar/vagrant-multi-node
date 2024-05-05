@@ -16,31 +16,39 @@ echo "VM_SERVICE_CIDR: $VM_SERVICE_CIDR"
 echo
 
 
-### --------------------------------
-
-echo 'Baixar as imagens do Kubernetes'
-kubeadm config images pull
-
 
 ### --------------------------------
 
 echo 'Executar o kubeadm init para criar o cluster'
-kubeadm init --control-plane-endpoint $VM_CONTROL_PLANE_ENDPOINT \
+kubeadm init --apiserver-advertise-address=$VM_IP \
+--control-plane-endpoint $VM_CONTROL_PLANE_ENDPOINT \
 --upload-certs \
 --node-name $VM_HOSTNAME \
 --pod-network-cidr=$VM_POD_NETWORK_CIDR \
 --service-cidr=$VM_SERVICE_CIDR \
 --apiserver-cert-extra-sans=$VM_VIRTUAL_IP,$VM_IP,$VM_HOSTNAME \
---cri-socket /run/containerd/containerd.sock
+--cri-socket unix:///run/containerd/containerd.sock
 
 ### --------------------------------
 
 
-echo 'Criar o kubeconfig para gerenciar o cluster'
-mkdir -p $HOME/.kube
-cp /etc/kubernetes/admin.conf $HOME/.kube/config
-chown $(id -u):$(id -g) $HOME/.kube/config
+echo 'Criar o kubeconfig no usuário root'
+mkdir -p "$HOME"/.kube
+cp /etc/kubernetes/admin.conf "$HOME"/.kube/config
 
+
+### --------------------------------
+
+echo 'Criar o kubeconfig no usuário vagrant'
+mkdir -p /home/vagrant/.kube
+cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+chown vagrant:vagrant /home/vagrant/.kube/config
+
+### --------------------------------
+
+echo 'Copiar pasta /etc/kubernetes para a pasta config do projeto'
+rm -rf /vagrant/config/kubernetes
+cp -R /etc/kubernetes /vagrant/config
 
 ### --------------------------------
 

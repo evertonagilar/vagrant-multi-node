@@ -122,7 +122,7 @@ echo 'Confgurar auto complete Kubernetes'
 apt-get install -y bash-completion
 mkdir -p /etc/bash_completion.d
 kubectl completion bash > /etc/bash_completion.d/kubectl
-echo << EOF | tee -a /etc/bash.bashrc
+cat << EOF >> /etc/bash.bashrc
 source /usr/share/bash-completion/bash_completion
 source /etc/bash_completion
 source <(kubectl completion bash)
@@ -134,15 +134,8 @@ EOF
 ### --------------------------------
 
 
-echo 'Mostrar os pacotes marcados para não atualizar'
-apt-mark showhold
-
-
-### --------------------------------
-
-
-echo 'Configurar o crictl'
-echo << EOF | tee /etc/crictl.yaml
+echo 'Criar arquivo de configuração /etc/crictl.yaml'
+cat << EOF >> /etc/crictl.yaml
 runtime-endpoint: unix:///run/containerd/containerd.sock
 image-endpoint: unix:///run/containerd/containerd.sock
 timeout: 2
@@ -154,7 +147,26 @@ EOF
 ### --------------------------------
 
 
+echo 'Mostrar os pacotes marcados que NÂO deve atualizar'
+apt-mark showhold
+
+
+### --------------------------------
+
+echo 'Configura KUBELET_EXTRA_ARGS para o kubelet'
+echo "KUBELET_EXTRA_ARGS=\"--node-ip=$VM_IP --container-runtime-endpoint=unix:///run/containerd/containerd.sock\"" >> /etc/default/kubelet
+
+
+### --------------------------------
+
+echo 'Baixar as imagens do Kubernetes'
+kubeadm config images pull --cri-socket unix:///run/containerd/containerd.sock
+
+
+### --------------------------------
+
 echo 'Habilitar o containerd e o kubelet'
 systemctl enable --now containerd
-systemctl enable --now kubelet
+systemctl enable kubelet
+systemctl restart kubelet
 
