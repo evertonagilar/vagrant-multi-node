@@ -8,6 +8,7 @@ for vm_variable in "${vm_variables[@]}"; do
   vm_variable_value=${vm_variable#*=}
   echo "$vm_variable_name=$vm_variable_value" | tee -a /etc/environment
 done
+echo ETCDCTL_API=$ETCDCTL_API | tee -a /etc/environment
 
 
 ### --------------------------------
@@ -25,7 +26,7 @@ if [ -n "$VM_CONTROLPLANE_NUMBER" ]; then
     else
         source scripts/k8s-join-controlplane.sh
     fi
-
+    source scripts/k8s-etcdctl.sh
 # **** Executar em worker node ***
 else
     source scripts/k8s-join-worker.sh

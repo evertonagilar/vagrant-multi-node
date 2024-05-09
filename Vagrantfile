@@ -32,7 +32,7 @@ Vagrant.configure(2) do |config|
     hostname = "#{VM_MASTER_BASE_NAME}#{i}"
     ip = "#{VM_IP_SUFIX}.#{VM_IP_CONTROLPLANE_START + i}"
     controlplaneNumber = i
-    vrrpPrioridade = 100 - controlplaneNumber
+    vrrpPrioridade = 101 - controlplaneNumber
     vrrpType = controlplaneNumber == 1 ? "MASTER" : "BACKUP"
     config.vm.define hostname do |node|
       node.vm.provider "virtualbox" do |v|
@@ -70,7 +70,8 @@ Vagrant.configure(2) do |config|
               "VM_VRRP_PRIORIDADE" => vrrpPrioridade,
               "VM_VRRP_TYPE" => vrrpType,
               "VM_K8S_VERSION" => VM_K8S_VERSION,
-              "VM_CALICO_VERSION" => VM_CALICO_VERSION
+              "VM_CALICO_VERSION" => VM_CALICO_VERSION,
+              "ETCDCTL_API" => "3"
             }, path: "scripts/bootstrap.sh"
     end
   end
