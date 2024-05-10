@@ -1,6 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+VM_CLUSTER_GROUP = "/VagrantMultiNode"
 VM_PASSWD_ROOT="teste"
 VM_CONTROLPLANE_COUNT = 3
 VM_WORKER_COUNT = 2
@@ -39,6 +40,7 @@ Vagrant.configure(2) do |config|
         v.name = hostname
         v.memory = 2048
         v.cpus = 2
+        v.customize ["modifyvm", :id, "--groups", VM_CLUSTER_GROUP]
       end
       node.vm.hostname = hostname
       node.vm.network "private_network", ip: ip
@@ -86,6 +88,7 @@ Vagrant.configure(2) do |config|
         v.name = hostname
         v.memory = 2048
         v.cpus = 2
+        v.customize ["modifyvm", :id, "--groups", VM_CLUSTER_GROUP]
       end
       node.vm.hostname = hostname
       node.vm.network "private_network", ip: ip
