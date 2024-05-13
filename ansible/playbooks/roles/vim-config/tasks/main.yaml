@@ -1,0 +1,14 @@
+---
+- name: Configurar o vim no usuário vagrant
+  become_user: vagrant
+  copy:
+    src: vimrc
+    dest: ~/.vimrc
+    mode: 0644
+
+- name: Configurar o vim no usuário root
+  become: yes
+  copy:
+    src: vimrc
+    dest: ~/.vimrc
+    mode: 0644

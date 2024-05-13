@@ -1,10 +1,49 @@
 ---
-- name: Atualizar os pacotes do SO
-  apt:
-    name: '*'
-    state: latest
-
-- name: instalação do git client
+- name: Instalação do git client
   apt:
     name: git
-    state: latest
+    state: present
+
+- name: Configurar o locale pt_BR.UTF-8
+  locale_gen:
+    name: pt_BR.UTF-8
+    state: present
+
+- name: Configurar o timezone para America/Sao_Paulo
+  timezone:
+    name: America/Sao_Paulo
+
+- name: Instalação de pacotes básicos
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - vim
+    - zip
+    - htop
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - wget
+    - gnupg
+    - lsb-release
+    - nfs-common
+    - htop
+    - chrony
+
+- name: Criar /etc/apt/keyrings se não existe
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: 755
+
+- name: Desabilitar o swap (1/2)
+  replace:
+    path: /etc/fstab
+    regexp: '^# (.+?\sswap\s+sw\s+.*)$'
+    replace: '\1'
+  register: desabilitar_swap
+
+- name: Desabilitar o swap (2/2)
+  command: swapoff -a
+  when: desabilitar_swap.changed

@@ -1,0 +1,115 @@
+---
+- name: Instalação dos módulos do Kernel
+  copy:
+    src: k8s.conf
+    dest: /etc/modules-load.d/k8s.conf
+    mode: 0644
+
+- name: Carregar módulo overlay
+  modprobe:
+    name: overlay
+    state: present
+
+- name: Carregar módulo br_netfilter
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Carregar módulo nf_nat
+  modprobe:
+    name: nf_nat
+    state: present
+
+- name: Carregar módulo xt_owner
+  modprobe:
+    name: xt_owner
+    state: present
+
+- name: Carregar módulo xt_REDIRECT
+  modprobe:
+    name: xt_REDIRECT
+    state: present
+
+- name: Carregar módulo iptable_nat
+  modprobe:
+    name: iptable_nat
+    state: present
+
+- name: Carregar módulo iptable_mangle
+  modprobe:
+    name: iptable_mangle
+    state: present
+
+- name: Carregar módulo iptable_filter
+  modprobe:
+    name: iptable_filter
+    state: present
+
+- name: Configurar parâmetros do sysctl (1/2)
+  copy:
+    src: sysctl.conf
+    dest: /etc/sysctl.d/100-k8s.conf
+    mode: 0644
+  register: sysctl_config
+
+- name: Aplicar parâmetros do sysctl (2/2)
+  command: "sysctl --system"
+  when: sysctl_config.changed
+
+- name: Adicionar a chave do repositório APT do kubernetes
+  apt_key:
+    url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    state: present
+
+- name: Adicionar o repositório APT do Kubernetes
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
+    filename: kubernetes
+    update_cache: yes
+
+- name: Instalar kubeadm, kubectl e kubelet
+  ansible.builtin.apt:
+    pkg:
+      - "kubectl={{ VM_K8S_VERSION }}"
+      - "kubeadm={{ VM_K8S_VERSION }}"
+      - "kubelet={{ VM_K8S_VERSION }}"
+    state: present
+
+- name: Criar a pasta /etc/bash_completion.d
+  file:
+    path: /etc/bash_completion.d
+    state: directory
+    mode: 744
+
+- name: Criar configuração do autocomplete do kubectl
+  ansible.builtin.shell:
+    cmd: kubectl completion bash > /etc/bash_completion.d/kubectl
+    creates: /etc/bash_completion.d/kubectl
+
+- name: Criar alias k para kubectl (1/2)
+  lineinfile:
+    path: /etc/bash.bashrc
+    line: alias k=kubectl
+    state: present
+  register: alias_config
+
+- name: Criar alias k para kubectl (2/2)
+  shell: alias k=kubectl
+  when: alias_config.changed
+
+- name: Baixar as imagens do Kubernetes
+  command: kubeadm config images pull --cri-socket unix:///run/containerd/containerd.sock
+
+- name: Habilitar o containerd
+  systemd:
+    name: containerd
+    enabled: yes
+    state: started
+
+- name: Habilitar o kubelet
+  systemd:
+    name: kubelet
+    enabled: yes
+    state: started
+

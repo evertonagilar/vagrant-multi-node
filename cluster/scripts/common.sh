@@ -46,7 +46,7 @@ locale-gen "${LANG} UTF-8"
 
 
 echo 'Configurar o timezone para America/Sao_Paulo'
-echo America/Sao_Paulo |  tee /etc/timezone
+echo America/Sao_Paulo | tee /etc/timezone
 ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
 dpkg-reconfigure --frontend noninteractive tzdata
 

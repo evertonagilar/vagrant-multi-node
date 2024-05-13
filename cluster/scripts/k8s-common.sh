@@ -10,28 +10,29 @@
 
 echo
 echo "Versão do Kubernetes: $VM_K8S_VERSION"
+echo "Versão do ContainerD: $VM_CONTAINERD_VERSION"
 echo
 
 
 ### --------------------------------
 
 
-echo 'Download da chave publica do Kubernetes'
+echo 'Adicionar a chave do repositório APT do Kubernetes'
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 
-echo 'Adicionar o repo Kubernetes'
+echo 'Adicionar o repositório APT do Kubernetes'
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
 
 
 ### --------------------------------
 
 
-echo 'Download da chave publica do Docker'
+echo 'Adicionar a chave do repositório APT do containerd'
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
 
-echo 'Adicionar o repo Docker'
+echo 'Adicionar o repositório APT do containerd'
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 
@@ -46,7 +47,7 @@ apt update
 
 
 echo 'Instalar Containerd'
-apt install -y containerd.io
+apt install -y containerd.io=$VM_CONTAINERD_VERSION
 
 echo 'Marcar para não atualizar containerd.io junto com o apt upgrade'
 apt-mark hold containerd.io
@@ -67,7 +68,7 @@ apt-mark hold kubelet kubeadm kubectl
 ### --------------------------------
 
 
-echo 'Configurar os módulos de kernel necessários para o K8S/Containerd'
+echo 'Instalação dos módulos do Linux Kernel'
 cat << EOF | tee /etc/modules-load.d/k8s.conf
 overlay
 br_netfilter
@@ -85,7 +86,7 @@ modprobe br_netfilter
 ### --------------------------------
 
 
-echo 'Configurar alguns parâmetros do sistema para Containerd'
+echo 'Configurar sysctl para o Kubernetes'
 cat << EOF | tee /etc/sysctl.d/100-k8s.conf
 kernel.shmall = 2097152
 kernel.shmmax = 4294967295
@@ -110,9 +111,13 @@ sysctl --system
 
 echo 'Criar o arquivo de configuração do Containerd'
 mkdir -p /etc/containerd
- containerd config default | \
+containerd config default | \
   sed 's/^\([[:space:]]*SystemdCgroup = \).*/\1true/' | \
   tee /etc/containerd/config.toml
+
+### --------------------------------
+
+echo 'Reiniciar o Containerd'
 systemctl restart containerd
 
 ### --------------------------------

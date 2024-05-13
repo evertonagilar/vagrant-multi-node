@@ -10,27 +10,28 @@ for vm_variable in "${vm_variables[@]}"; do
 done
 echo ETCDCTL_API=$ETCDCTL_API | tee -a /etc/environment
 
-
 ### --------------------------------
 
 echo 'Chamando os scripts da pasta common do projeto...'
 source common/ssh/ssh-internode-config.sh
 
-echo 'Chamando os scripts da pasta cluster do projeto...'
-source scripts/common.sh
-source scripts/k8s-common.sh
+if [ "$VM_BOOTSTRAP_WITH_ANSIBLE" == 'false' ]; then
+    echo 'Chamando os scripts da pasta cluster do projeto...'
+    source scripts/common.sh
+    source scripts/k8s-common.sh
 
-# *** Executar em controlplane ***
-if [ -n "$VM_CONTROLPLANE_NUMBER" ]; then
-    source scripts/keepalived.sh
-    if [ "$VM_CONTROLPLANE_NUMBER" == "1" ]; then
-        source scripts/k8s-init.sh
-        source scripts/k8s-join-print.sh
+    # *** Executar em controlplane ***
+    if [ -n "$VM_CONTROLPLANE_NUMBER" ]; then
+        source scripts/keepalived.sh
+        if [ "$VM_CONTROLPLANE_NUMBER" == "1" ]; then
+            source scripts/k8s-init.sh
+            source scripts/k8s-join-print.sh
+        else
+            source scripts/k8s-join-controlplane.sh
+        fi
+        source scripts/k8s-etcdctl.sh
+    # **** Executar em worker node ***
     else
-        source scripts/k8s-join-controlplane.sh
+        source scripts/k8s-join-worker.sh
     fi
-    source scripts/k8s-etcdctl.sh
-# **** Executar em worker node ***
-else
-    source scripts/k8s-join-worker.sh
 fi

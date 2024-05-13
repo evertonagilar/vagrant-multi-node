@@ -16,6 +16,14 @@ sed -i \
 
 ### --------------------------------
 
+echo 'Configurar parâmetro ssh PermitRootLogin para yes'
+sed -i \
+  's/^MaxAuthTries.*/#MaxAuthTries 10/' \
+  /etc/ssh/sshd_config
+
+
+### --------------------------------
+
 echo 'Criar arquivo configuração /home/vagrant/.ssh/config'
 cat << EOF >> /home/vagrant/.ssh/config
 Host vm-*
