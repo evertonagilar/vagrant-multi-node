@@ -1,0 +1,10 @@
+---
+- name: Atualizar os pacotes do SO
+  apt:
+    name: '*'
+    state: latest
+
+- name: instalação do git client
+  apt:
+    name: git
+    state: latest

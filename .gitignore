@@ -1,6 +1,6 @@
 .idea/
 .vagrant
-config/ssh/
-config/kubernetes/
-config/users
-samples/
+cluster/config/ssh/
+cluster/config/kubernetes/
+cluster/config/users
+cluster/samples/

@@ -1,0 +1,25 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VM_BOX = "boxomatic/debian-12"
+VM_BOX_VERSION = "20240225.0.1"
+VM_ANSIBLE_CONTROL_IP = "192.168.10.9"
+VM_ANSIBLE_CONTROL_HOSTNAME = "vm-ansible"
+VM_CLUSTER_GROUP = "/VagrantMultiNode"
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "#{VM_BOX}"
+  config.vm.box_version = "#{VM_BOX_VERSION}"
+  config.vm.box_check_update = false
+  config.vbguest.auto_update = false
+  config.vm.hostname = VM_ANSIBLE_CONTROL_HOSTNAME
+  config.vm.network "private_network", ip: VM_ANSIBLE_CONTROL_IP
+  config.vm.provider "virtualbox" do |v|
+    v.name = VM_ANSIBLE_CONTROL_HOSTNAME
+    v.memory = 512
+    v.cpus = 2
+    v.customize ["modifyvm", :id, "--groups", VM_CLUSTER_GROUP]
+  end
+  config.vm.provision "file", source: "../common", destination: "~/common"
+  config.vm.provision "shell", path: "provision.sh"
+end

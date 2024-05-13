@@ -13,7 +13,10 @@ echo ETCDCTL_API=$ETCDCTL_API | tee -a /etc/environment
 
 ### --------------------------------
 
-echo 'Chamando os scripts para provisionar o cluster Kubernetes...'
+echo 'Chamando os scripts da pasta common do projeto...'
+source common/ssh/ssh-internode-config.sh
+
+echo 'Chamando os scripts da pasta cluster do projeto...'
 source scripts/common.sh
 source scripts/k8s-common.sh
 

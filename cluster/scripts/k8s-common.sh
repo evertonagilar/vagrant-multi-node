@@ -118,7 +118,7 @@ systemctl restart containerd
 ### --------------------------------
 
 
-echo 'Confgurar auto complete Kubernetes'
+echo 'Configurar auto complete Kubernetes'
 apt-get install -y bash-completion
 mkdir -p /etc/bash_completion.d
 kubectl completion bash > /etc/bash_completion.d/kubectl

@@ -1,0 +1,21 @@
+- name: "Configurar o cluster kubernetes"
+  hosts: controlplane worker
+  user: vagrant
+  become: yes
+  vars_files:
+    - vars/main.yaml
+  tasks:
+    - name: Configurar hosts ansible
+      lineinfile:
+        dest: /etc/hosts
+        state: present
+        line: "{{item}}"
+      with_items:
+        - "192.168.10.11   vm-controlplane1"
+        - "192.168.10.12   vm-controlplane2"
+        - "192.168.10.13   vm-controlplane3"
+        - "192.168.10.16   vm-worker1"
+        - "192.168.10.17   vm-worker2"
+  roles:
+    - config-default-so
+
