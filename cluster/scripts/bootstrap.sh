@@ -1,22 +1,15 @@
 #!/bin/bash
 
-echo 'Cadastrar variáveis do Vagrantfile em /etc/environment'
-vm_variables=$(env | grep -E '^VM_')
-vm_variable_names=(${vm_variables[@]})
-for vm_variable in "${vm_variables[@]}"; do
-  vm_variable_name=${vm_variable%%=*}
-  vm_variable_value=${vm_variable#*=}
-  echo "$vm_variable_name=$vm_variable_value" | tee -a /etc/environment
-done
-echo ETCDCTL_API=$ETCDCTL_API | tee -a /etc/environment
-
-### --------------------------------
-
-echo 'Chamando os scripts da pasta common do projeto...'
+echo '********** Chamando os scripts da pasta common do projeto **********'
 source common/ssh/ssh-internode-config.sh
 
-if [ "$VM_BOOTSTRAP_WITH_ANSIBLE" == 'false' ]; then
-    echo 'Chamando os scripts da pasta cluster do projeto...'
+if [ "$VM_BOOTSTRAP_WITH_ANSIBLE" == 'true' ]; then
+    echo '********** A criação do cluster Kubernetes será feito com Ansible *********'
+    sleep 2
+else
+    echo '********** Iniciando o provisionamento do cluster com scripts *********'
+    sleep 2
+
     source scripts/common.sh
     source scripts/k8s-common.sh
 

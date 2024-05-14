@@ -75,7 +75,8 @@ Vagrant.configure(2) do |config|
               "VM_K8S_VERSION" => VM_K8S_VERSION,
               "VM_CONTAINERD_VERSION" => VM_CONTAINERD_VERSION,
               "VM_CALICO_VERSION" => VM_CALICO_VERSION,
-              "ETCDCTL_API" => "3"
+              "ETCDCTL_API" => "3",
+              "VM_BOOTSTRAP_WITH_ANSIBLE" => VM_BOOTSTRAP_WITH_ANSIBLE
             }, path: "scripts/bootstrap.sh"
     end
   end
@@ -118,7 +119,8 @@ Vagrant.configure(2) do |config|
               "VM_VIRTUAL_IP" => VM_VIRTUAL_IP,
               "VM_DNS_VIRTUAL_IP" => VM_DNS_VIRTUAL_IP,
               "VM_K8S_VERSION" => VM_K8S_VERSION,
-              "VM_CALICO_VERSION" => VM_CALICO_VERSION
+              "VM_CALICO_VERSION" => VM_CALICO_VERSION,
+              "VM_BOOTSTRAP_WITH_ANSIBLE" => VM_BOOTSTRAP_WITH_ANSIBLE
             }, path: "scripts/bootstrap.sh"
     end
   end

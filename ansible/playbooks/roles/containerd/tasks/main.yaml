@@ -36,7 +36,7 @@
 
   - name: Instalar o containerd.io
     apt:
-      name: "containerd.io={{ containerd_version }}"
+      name: "containerd.io={{ VM_CONTAINER_VERSION }}"
       state: present
 
   - name: Criar diretório de configuração do containerd

@@ -1,28 +1,38 @@
-- name: "Executar configuração básica do SO"
-  hosts: controlplane worker
-  user: vagrant
-  become: yes
-  vars_files:
-    - vars/main.yaml
-  roles:
-    - config-default-so
-    - vim-config
+#- name: "Executar configuração básica do SO"
+#  hosts: controlplane worker
+#  user: vagrant
+#  become: yes
+#  vars_files:
+#    - vars/main.yaml
+#  roles:
+#    - config-default-so
+#    - vim-config
+#
+#- name: "Instalar containerd, kubelet e ferramentas do kubernetes"
+#  hosts: controlplane worker
+#  user: vagrant
+#  become: yes
+#  vars_files:
+#    - vars/main.yaml
+#  roles:
+#    - containerd
+#    - kubernetes-common
 
-- name: "Instalar containerd, kubelet e ferramentas do kubernetes"
-  hosts: controlplane worker
+- name: "Instalar keepalived nos controlplanes"
+  hosts: controlplane
   user: vagrant
   become: yes
   vars_files:
     - vars/main.yaml
   roles:
-    - containerd
-    - kubernetes-common
+    - keepalived
 
-- name: "Inicializar o cluster no primeiro controlplane"
-  hosts: vm-controlplane1
-  user: vagrant
-  become: yes
-  vars_files:
-    - vars/main.yaml
-  roles:
-    - kubernetes-init
+
+#- name: "Inicializar o cluster no primeiro controlplane"
+#  hosts: vm-controlplane1
+#  user: vagrant
+#  become: yes
+#  vars_files:
+#    - vars/main.yaml
+#  roles:
+#    - kubernetes-init

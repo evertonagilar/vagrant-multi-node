@@ -1,9 +1,4 @@
 ---
-- name: Instalação do git client
-  apt:
-    name: git
-    state: present
-
 - name: Configurar o locale pt_BR.UTF-8
   locale_gen:
     name: pt_BR.UTF-8
@@ -13,11 +8,12 @@
   timezone:
     name: America/Sao_Paulo
 
-- name: Instalação de pacotes básicos
+- name: Instalação de pacotes essenciais
   apt:
     name: "{{ item }}"
     state: present
   with_items:
+    - git
     - vim
     - zip
     - htop
@@ -31,7 +27,7 @@
     - htop
     - chrony
 
-- name: Criar /etc/apt/keyrings se não existe
+- name: Criar diretório /etc/apt/keyrings se não existe
   file:
     path: /etc/apt/keyrings
     state: directory
