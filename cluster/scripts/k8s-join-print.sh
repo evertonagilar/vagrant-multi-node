@@ -6,10 +6,10 @@
 #######################################################################
 
 
-echo 'Criar kubeadm join token'
+echo 'Criar o join_command para adicionar os demais nodes'
 join_command="$(kubeadm token create --print-join-command)"
 
-echo 'Subindo os certificados para o novo controlplane e obter o token'
+echo 'Obter token para adicionar novo controlplane'
 TOKEN_CERT=$(kubeadm init phase upload-certs --upload-certs 2> /dev/null | tail -1)
 
 echo 'Gerando arquivo /opt/join-controlplane.sh'

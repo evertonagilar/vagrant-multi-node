@@ -8,6 +8,12 @@
       - "VM_POD_NETWORK_CIDR = {{ VM_POD_NETWORK_CIDR }}"
       - "VM_SERVICE_CIDR = {{ VM_SERVICE_CIDR }}"
       - "VM_VIRTUAL_IP = {{ VM_VIRTUAL_IP }}"
+      - "VM_CALICO_VERSION = {{ VM_CALICO_VERSION }}"
+
+- name: Verificando se o cluster já existe
+  stat:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+  register: cluster_stat
 
 - name: Executar o kubeadm init para criar o cluster
   shell: |
@@ -21,6 +27,21 @@
     --cri-socket unix:///run/containerd/containerd.sock
   args:
     executable: /bin/bash
-  register: kubeadm_init
+  when: not cluster_stat.stat.exists
 
-- debug: msg="{{ kubeadm_init.stdout }}"
+- name: Criar o comando de join
+  command: kubeadm token create --print-join-command
+  register: print_join_command
+
+- name: Adicionar o join_command no fact
+  set_fact: join_command="{{ print_join_command.stdout }}"
+
+- name: Obter token para adicionar novo controlplane
+  shell: kubeadm init phase upload-certs --upload-certs 2> /dev/null | tail -1
+  register: token_join_command
+
+- name: Adicionar o token para join no fact
+  set_fact: join_token="{{ token_join_command.stdout }}"
+
+- name: Instalar plugin de rede Calico CNI
+  command: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/{{ VM_CALICO_VERSION }}/manifests/calico.yaml

@@ -1,0 +1,51 @@
+---
+- name: Criar a pasta /root/.kube
+  file:
+    path: /root/.kube
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
+
+- name: Copiar o arquivo /etc/kubernetes/admin.conf para /root/.kube/config
+  copy:
+    dest: /root/.kube/config
+    src: /etc/kubernetes/admin.conf
+    remote_src: yes
+    mode: 0700
+    owner: root
+    group: root
+
+- name: Stat da pasta /home/vagrant
+  stat:
+    path: /home/vagrant
+  register: dir_vagrant_stat
+
+- name: Criar a pasta /home/vagrant/.kube
+  file:
+    path: /home/vagrant/.kube
+    state: directory
+    mode: 0700
+    owner: vagrant
+    group: vagrant
+  when: dir_vagrant_stat.stat.exists
+
+- name: Copiar o arquivo /etc/kubernetes/admin.conf para /home/vagrant/.kube/config
+  copy:
+    dest: /home/vagrant/.kube/config
+    src: /etc/kubernetes/admin.conf
+    remote_src: yes
+    mode: 0700
+    owner: vagrant
+    group: vagrant
+  when: dir_vagrant_stat.stat.exists
+
+- name: Copiar pasta /etc/kubernetes para a pasta /vagrant/config
+  copy:
+    dest: /vagrant/config/kubernetes
+    src: /etc/kubernetes
+    remote_src: yes
+    force: yes
+  when: dir_vagrant_stat.stat.exists
+
+

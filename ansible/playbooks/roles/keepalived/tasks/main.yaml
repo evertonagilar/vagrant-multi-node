@@ -24,7 +24,6 @@
       - "VM_VRRP_PRIORIDADE = {{ VM_VRRP_PRIORIDADE }}"
       - "VM_VRRP_TYPE = {{ VM_VRRP_TYPE }}"
 
-
 - name: Instalar o keepalived
   apt:
     name: keepalived

@@ -27,4 +27,5 @@ else
     else
         source scripts/k8s-join-worker.sh
     fi
+    source scripts/k8s-kubeconfig.sh
 fi
