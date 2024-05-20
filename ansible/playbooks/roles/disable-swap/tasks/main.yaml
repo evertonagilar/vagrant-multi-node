@@ -1,0 +1,17 @@
+---
+- name: Criar diretório /etc/apt/keyrings se não existe
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: 755
+
+- name: Desabilitar o swap (1/2)
+  replace:
+    path: /etc/fstab
+    regexp: '^# (.+?\sswap\s+sw\s+.*)$'
+    replace: '\1'
+  register: desabilitar_swap
+
+- name: Desabilitar o swap (2/2)
+  command: swapoff -a
+  when: desabilitar_swap.changed

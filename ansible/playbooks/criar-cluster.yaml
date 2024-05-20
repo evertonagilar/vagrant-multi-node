@@ -1,66 +1,69 @@
-- name: Executar configuração básica do SO
-  hosts: controlplane worker
+- name: Executar tarefas básicas em todas máquinas
+  hosts: all
   user: vagrant
   become: yes
   vars_files:
     - vars/main.yaml
   roles:
-    - config-default-so
+    - etc-hosts-config
+    - locale-timezone
+    - disable-swap
+    - pacotes-essenciais
     - vim-config
 
-- name: Instalar containerd, kubelet e ferramentas do kubernetes
-  hosts: controlplane worker
-  user: vagrant
-  become: yes
-  vars_files:
-    - vars/main.yaml
-  roles:
-    - containerd
-    - k8s-common
-
-- name: Instalar keepalived nos controlplanes
-  hosts: controlplane
-  user: vagrant
-  become: yes
-  vars_files:
-    - vars/main.yaml
-  roles:
-    - keepalived
-
-- name: Inicializar o cluster no primeiro controlplane
-  hosts: vm-controlplane1
-  user: vagrant
-  become: yes
-  vars_files:
-    - vars/main.yaml
-  roles:
-    - k8s-init
-    - k8s-kubeconfig
-
-- name: Fazer join dos nodes controlplane
-  hosts: controlplane_join
-  user: vagrant
-  become: yes
-  vars_files:
-    - vars/main.yaml
-  roles:
-    - k8s-join-controlplane
-    - k8s-kubeconfig
-
-- name: Fazer join dos nodes workers
-  hosts: worker
-  user: vagrant
-  become: yes
-  vars_files:
-    - vars/main.yaml
-  roles:
-    - k8s-join-worker
-
-- name: Provisionar recursos após criação do cluster
-  hosts: vm-controlplane1
-  user: vagrant
-  become: yes
-  vars_files:
-    - vars/main.yaml
-  roles:
-    - metrics-server
+#- name: Instalar keepalived nos controlplanes
+#  hosts: controlplane
+#  user: vagrant
+#  become: yes
+#  vars_files:
+#    - vars/main.yaml
+#  roles:
+#    - keepalived
+#
+#- name: Instalar containerd, kubelet e ferramentas do kubernetes
+#  hosts: controlplane worker
+#  user: vagrant
+#  become: yes
+#  vars_files:
+#    - vars/main.yaml
+#  roles:
+#    - containerd
+#    - k8s-common
+#
+#- name: Inicializar o cluster no primeiro controlplane
+#  hosts: vm-controlplane1
+#  user: vagrant
+#  become: yes
+#  vars_files:
+#    - vars/main.yaml
+#  roles:
+#    - k8s-init
+#    - k8s-kubeconfig
+#
+#- name: Fazer join dos nodes controlplane
+#  hosts: controlplane_join
+#  user: vagrant
+#  become: yes
+#  vars_files:
+#    - vars/main.yaml
+#  roles:
+#    - k8s-join-controlplane
+#    - k8s-kubeconfig
+#
+#- name: Fazer join dos nodes workers
+#  hosts: worker
+#  user: vagrant
+#  become: yes
+#  vars_files:
+#    - vars/main.yaml
+#  roles:
+#    - k8s-join-worker
+#
+#- name: Provisionar recursos após criação do cluster
+#  hosts: vm-controlplane1
+#  user: vagrant
+#  become: yes
+#  vars_files:
+#    - vars/main.yaml
+#  roles:
+#    - metrics-server

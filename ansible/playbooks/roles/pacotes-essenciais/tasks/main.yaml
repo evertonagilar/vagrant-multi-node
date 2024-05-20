@@ -1,0 +1,19 @@
+---
+- name: Instalação de pacotes essenciais
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - git
+    - vim
+    - zip
+    - htop
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - wget
+    - gnupg
+    - lsb-release
+    - nfs-common
+    - htop
+    - chrony

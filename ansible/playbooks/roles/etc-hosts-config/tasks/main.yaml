@@ -1,0 +1,47 @@
+- name: "Cadastrar os nodes no arquivo /etc/hosts"
+  hosts: all
+  user: vagrant
+  become: yes
+  tasks:
+    - name: Configurar hosts
+      lineinfile:
+        dest: /etc/hosts
+        state: present
+        line: "{{item}}"
+      with_items:
+        - 192.168.10.10 controlplane controlplane.kubernetes.local
+        - 192.168.10.11 vm-controlplane1 vm-controlplane1.kubernetes.local
+        - 192.168.10.12 vm-controlplane2 vm-controlplane2.kubernetes.local
+        - 192.168.10.13 vm-controlplane3 vm-controlplane3.kubernetes.local
+        - 192.168.10.16 vm-worker1 vm-worker1.kubernetes.local
+        - 192.168.10.17 vm-worker2 vm-worker2.kubernetes.local
+
+
+---
+- name: Configurar o locale pt_BR.UTF-8
+  locale_gen:
+    name: pt_BR.UTF-8
+    state: present
+
+- name: Configurar o timezone para America/Sao_Paulo
+  timezone:
+    name: America/Sao_Paulo
+
+- name: Instalação de pacotes essenciais
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - git
+    - vim
+    - zip
+    - htop
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - wget
+    - gnupg
+    - lsb-release
+    - nfs-common
+    - htop
+    - chrony
