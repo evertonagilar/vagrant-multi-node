@@ -1,4 +1,4 @@
-- name: Executar tarefas básicas em todas máquinas
+- name: Executar tarefas básicas de SO em todas máquinas
   hosts: all
   user: vagrant
   become: yes
@@ -10,25 +10,42 @@
     - disable-swap
     - pacotes-essenciais
     - vim-config
+  tags:
+    - so
 
-#- name: Instalar keepalived nos controlplanes
-#  hosts: controlplane
-#  user: vagrant
-#  become: yes
-#  vars_files:
-#    - vars/main.yaml
-#  roles:
-#    - keepalived
-#
-#- name: Instalar containerd, kubelet e ferramentas do kubernetes
-#  hosts: controlplane worker
-#  user: vagrant
-#  become: yes
-#  vars_files:
-#    - vars/main.yaml
-#  roles:
-#    - containerd
-#    - k8s-common
+
+- name: Instalar keepalived nos controlplanes
+  hosts: controlplane
+  user: vagrant
+  become: yes
+  vars_files:
+    - vars/main.yaml
+  roles:
+    - keepalived
+  tags:
+    - keepalived
+
+- name: Instalar containerd
+  hosts: controlplane worker
+  user: vagrant
+  become: yes
+  vars_files:
+    - vars/main.yaml
+  roles:
+    - containerd
+  tags:
+    - containerd
+
+- name: Instalar kubelet, kubectl, kubeadm
+  hosts: controlplane worker
+  user: vagrant
+  become: yes
+  vars_files:
+    - vars/main.yaml
+  roles:
+    - k8s-common
+  tags:
+    - k8s-common
 #
 #- name: Inicializar o cluster no primeiro controlplane
 #  hosts: vm-controlplane1

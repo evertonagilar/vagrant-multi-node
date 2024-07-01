@@ -65,4 +65,5 @@ cp -R /etc/kubernetes /vagrant/config
 
 echo 'Instalar plugin de rede Calico CNI'
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/$VM_CALICO_VERSION/manifests/calico.yaml
+sleep 30
 

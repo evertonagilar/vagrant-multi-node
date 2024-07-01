@@ -5,13 +5,13 @@
     state: directory
     mode: 755
 
-- name: Desabilitar o swap (1/2)
+- name: Desabilitar o swap em /etc/fstab
   replace:
     path: /etc/fstab
     regexp: '^# (.+?\sswap\s+sw\s+.*)$'
     replace: '\1'
   register: desabilitar_swap
 
-- name: Desabilitar o swap (2/2)
+- name: Desabilitar o swap com swapoff se /etc/fstab changed
   command: swapoff -a
   when: desabilitar_swap.changed

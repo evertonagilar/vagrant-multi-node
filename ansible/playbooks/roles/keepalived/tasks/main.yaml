@@ -43,7 +43,7 @@
     dest: /etc/keepalived/check_apiserver.sh
     owner: keepalived_script
     group: nogroup
-    mode: '0644'
+    mode: '0544'
 
 - name: Criar o arquivo de configuração do keepalived
   ansible.builtin.template:

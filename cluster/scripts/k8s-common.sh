@@ -13,6 +13,17 @@ echo "Versão do Kubernetes: $VM_K8S_VERSION"
 echo "Versão do ContainerD: $VM_CONTAINERD_VERSION"
 echo
 
+### --------------------------------
+
+echo ETCDCTL_API=$ETCDCTL_API | tee -a /etc/environment
+
+### --------------------------------
+
+echo 'Desabilitar o swap'
+swapoff -a
+sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+
 
 ### --------------------------------
 

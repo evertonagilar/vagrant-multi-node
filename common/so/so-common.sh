@@ -3,17 +3,16 @@
 # Objetivos do script:
 # ====================================================================
 # * Configurar /etc/hosts
-# * Configurar comunicação ssh entre VMs
 # * Configurar locale pt_BR.UTF-8
 # * Configurar o timezone para America/Sao_Paulo
 # * Instalação de pacotes básicos 
 # * Criar /etc/apt/keyrings se não existe
 # * Configurar o vim
-# * Desabilitar o swap
 #
 #
 #######################################################################
 
+echo '------------------------ Faz a cofiguração básica no SO ------------------------'
 
 echo 'Configurar o locale pt_BR.UTF-8'
 export LANG=pt_BR.UTF-8
@@ -35,7 +34,7 @@ dpkg-reconfigure --frontend noninteractive tzdata
 
 
 echo 'Instalação de pacotes básicos'
-apt install -y vim apt-transport-https ca-certificates curl wget gnupg lsb-release nfs-common htop chrony
+apt install -y vim apt-transport-https ca-certificates curl wget gnupg lsb-release nfs-common htop chrony python3-pip jq
 
 
 ### --------------------------------
@@ -65,10 +64,4 @@ cp /root/.vimrc /home/vagrant/.vimrc && chown vagrant:vagrant /home/vagrant/.vim
 ### --------------------------------
 
 
-echo 'Desabilitar o swap'
-swapoff -a
-sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
-
-
-### --------------------------------
 

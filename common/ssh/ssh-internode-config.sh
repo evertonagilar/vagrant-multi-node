@@ -8,7 +8,6 @@ for vm_variable in "${vm_variables[@]}"; do
   echo "$vm_variable_name=$vm_variable_value" | tee -a /etc/environment
 done
 
-echo ETCDCTL_API=$ETCDCTL_API | tee -a /etc/environment
 
 ### --------------------------------
 

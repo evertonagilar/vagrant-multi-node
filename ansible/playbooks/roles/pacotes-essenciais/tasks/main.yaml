@@ -1,5 +1,5 @@
 ---
-- name: Instalação de pacotes essenciais
+- name: Instalação de pacotes essenciais no SO
   apt:
     name: "{{ item }}"
     state: present
@@ -17,3 +17,5 @@
     - nfs-common
     - htop
     - chrony
+    - yq
+    - dnsutils
